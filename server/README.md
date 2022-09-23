@@ -13,6 +13,11 @@ See sample.env for more about this.
 It is reccomended to use port 3003 so that the react client can run on port 3000. 
 If both the server and client run on the same port there is going to be an error.
 
+Make sure to run 
+
+### `npm install`
+On the first time of starting the server to download the node modules. 
+
 ## Server does not work with the browser
 
 The server has been designed to work the client, not with the browser.
