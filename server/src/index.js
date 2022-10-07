@@ -5,12 +5,20 @@
 //Imports
 const express = require('express');
 const helmet = require('helmet'); //http security headers
-const cors = require('cors') //Allow CORS
-var logger = require('morgan'); //logging middleware
+const cors = require('cors'); //Allow CORS
+const cookieParser = require('cookie-parser'); //Cookie management
+const csurf = require('csurf'); //CSRF Tokens to prevent CSRF attacks
 const os = require('os'); //Adds access to the OS
+var logger = require('morgan'); //logging middleware
 //import routers 
 const APIrouter = require("./routes/APIrouter.js");
+const topLevelRouter = require("./routes/topLevelRouter.js");
+//const mountMiddlewares = require("./routes/middlewares.js");
 require('dotenv').config(); //Load the .env config file
+
+// =================================================================
+
+// SERVER SETUP AND CONFIG
 
 //Get the info about the machine the server is running on
 const MACHINE_INFO = {
@@ -48,9 +56,17 @@ var corsOptions = {
     origin: "http://localhost:3000"
 };
 
+//Store the CSRF Token in a bookie
+const csrfMiddleware = csurf ({
+    cookie: {
+        maxAge: 300000000,
+        secure: true,
+        sameSite: 'none'
+    }
+});
+
 //Initialize expressJS
 const app = express();
-//Initialize express router
 const router = express.Router();
 //Set port
 var port = normalizePort(process.env.PORT || '3000');
@@ -85,19 +101,50 @@ function defaultPortWarning() {
 
 // =================================================================
 
+// MIDDLEWARES
+
+//require("./routes/middlewares.js")(app);
+//mountMiddlewares(app);
+
 //Enable All CORS Requests
 app.use(cors(corsOptions));
 //Set http security headers
 app.use(helmet());
+//Enable cookie parsing
+app.use(cookieParser());
+//Enable CSRF Tokens for every request to the server
+//CSRF tokens do not work on GET requests
+//  app.use(csrfMiddleware); //NOTE: CSRF not yet enabled on client side
+
+//Error response for invalid CSRF Tokens
+// DOESNT WORK YET !?
+app.use((err, req, res, next) => {
+    console.log("TEST TEST");
+    if (err.code === 'EBADCSRFTOKEN') 
+    {
+        res.status(403)
+        res.send("Invalid CSRF Token!")
+    } 
+    else 
+    {
+        console.log("JUST TESTING");
+        next();
+    }
+    next();
+});
+
 //Enable logging middleware based on mode
 if (MODE === "development") {
+    console.log("test");
     app.use(logger('dev'));
+    console.log("test2");
 } 
 else if (MODE === "production") {
     app.use(logger('common'));
 }
 //For parsing application/json
 app.use(express.json());
+app.use("/", topLevelRouter);
 //mount the API Router
 //All routes will go to URL:PORT/api 
 app.use("/api", APIrouter);
@@ -116,4 +163,4 @@ app.listen(port, () => {
     console.log(`Use CTRL+C to stop the server...`);
 });
 
-module.exports = router;
+module.exports = app;

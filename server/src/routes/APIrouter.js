@@ -5,7 +5,8 @@ const express = require('express');
 const APIrouter = express.Router();
 
 APIrouter.get('/', (req, res, next) => {
-    res.status(200).send({ message: "<h1>HELLO WORLD</h1>"});
+    console.log("HELLO");
+    res.status(200).send({ message: "<h1>API WORKS!</h1>"});
 });
 
 module.exports = APIrouter;

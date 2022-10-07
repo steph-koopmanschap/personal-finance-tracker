@@ -27,12 +27,13 @@ export default function Registration() {
 
             let userData = {};
             //Transform the user inputs to the user data
-            //The userId and lastLogin will be generated on the server.
+            //The userId, lastLogin, and accountCreationDate will be generated on the server.
             userData = {
                 userId: 0,
                 username: registrationState.userNameInput,
                 password: registrationState.passwordInput,
-                lastLogin: "0000-00-00", 
+                accountCreationDate: "0000-00-00",
+                lastLoginDate: "0000-00-00", 
                 isLoggedIn: false,
             };
 
